@@ -5,6 +5,7 @@ import { emojis } from './assets/emojis';
 import Reload from './components/icons/reload';
 import { CardProps } from './interfaces/card.type';
 import { FlippedCardProps } from './interfaces/flipped-card.type';
+import { motion } from "framer-motion";
 
 const App: React.FC = () => {
   const [level, setLevel] = useState<number>(1);
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   }, [level]);
 
   const generateCards = () => {
+    setShow(true)
     const newColors = getShuffledArray(colors, ((gridSize * gridSize) / 2))
     const icons = getShuffledArray(emojis, ((gridSize * gridSize) / 2))
     const pairs: CardProps[] = [];
@@ -83,36 +85,56 @@ const App: React.FC = () => {
         <div className="text-lg font-bold">Level {level}</div>
         <div className="text-lg font-bold mr-3">Points: {points}</div>
       </div>
-      <div className={`grid`} style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`, gap: `calc(2rem / ${gridSize})`, width: '65vh', height: '65vh' }}>
-        {cards.map((card, index) => (
-          <div
-            key={index}
-            className={`bg-gray-200 border border-gray-400 rounded-lg cursor-pointer`}
-            style={{
-              backgroundColor: (show || flippedCards.some((flippedCard) => flippedCard.index === index) || matchedCards.includes(index))
-                ? card.color
-                : '',
-              width: `calc((70vh - ${(gridSize - 1) * 0.8}rem) / ${gridSize})`,
-              height: `calc((70vh - ${(gridSize - 1) * 0.8}rem) / ${gridSize})`,
-            }}
-            onClick={() => handleCardClick(card, index)}
-          >
-            <span
+      <div className={`grid mb-4`} style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`, gap: `calc(2rem / ${gridSize})`, width: '65vh', height: '65vh' }}>
+        {cards.map((card, index) => {
+          const isFlipped = show || flippedCards.some((flippedCard) => flippedCard.index === index) || matchedCards.includes(index);
+
+          return (
+            <motion.div
+              key={index}
+              className="relative cursor-pointer"
               style={{
-                fontSize: `calc(10rem / ${gridSize})`,
-                lineHeight: '1',
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100%', 
-                width: '100%', 
+                width: `calc((70vh - ${(gridSize - 1) * 0.8}rem) / ${gridSize})`,
+                height: `calc((70vh - ${(gridSize - 1) * 0.8}rem) / ${gridSize})`,
               }}
+              onClick={() => handleCardClick(card, index)}
             >
-              {(show || flippedCards.some((flippedCard) => flippedCard.index === index) || matchedCards.includes(index)) ? card.icon : ''}
-            </span>
-          </div>
-        ))}
+              <motion.div
+                className={`absolute inset-0 bg-gray-200 border border-gray-400 rounded-lg`}
+                initial={{ rotateY: 0 }}
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.6 }}
+                style={{
+                  backfaceVisibility: "hidden",
+                }}
+              >
+                {/* Front of the Card */}
+              </motion.div>
+
+              <motion.div
+                className={`absolute inset-0 bg-gray-100 border border-gray-400 rounded-lg flex justify-center items-center`}
+                initial={{ rotateY: 180 }}
+                animate={{ rotateY: isFlipped ? 0 : 180 }}
+                transition={{ duration: 0.6 }}
+                style={{
+                  backgroundColor: isFlipped ? card.color : '',
+                  backfaceVisibility: "hidden",
+                }}
+              >
+                {/* Back of the Card */}
+                <span
+                  style={{
+                    fontSize: `calc(10rem / ${gridSize})`,
+                    lineHeight: "1",
+                    textAlign: "center",
+                  }}
+                >
+                  {card.icon}
+                </span>
+              </motion.div>
+            </motion.div>
+          );
+        })}
       </div>
       {levelClear && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -132,6 +154,24 @@ const App: React.FC = () => {
                 Next Level
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {(points <= 0) && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">Game Over</h2>
+            <p className='font-bold text-md text-white mb-4'>You have lost all your points</p>
+            <button
+              className="px-4 py-2 bg-red-500 text-white rounded-lg text-lg flex mx-auto"
+              onClick={() => {
+                generateCards()
+                setPoints(100)
+              }}
+            >
+              <Reload className='size-5 mr-1 mt-1' /> Try Again
+            </button>
           </div>
         </div>
       )}
