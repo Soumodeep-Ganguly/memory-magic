@@ -85,7 +85,12 @@ const App: React.FC = () => {
         <div className="text-lg font-bold">Level {level}</div>
         <div className="text-lg font-bold mr-3">Points: {points}</div>
       </div>
-      <div className={`grid mb-4`} style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`, gap: `calc(2rem / ${gridSize})`, width: '65vh', height: '65vh' }}>
+      <div className={`grid mb-4`} style={{ 
+        gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
+        gap: `calc(1rem / ${gridSize})`, // Reduced gap for smaller screens
+        width: `min(65vh, 90vw)`, // Dynamically adjust grid width
+        height: `min(65vh, 90vw)`, // Dynamically adjust grid height
+       }}>
         {cards.map((card, index) => {
           const isFlipped = show || flippedCards.some((flippedCard) => flippedCard.index === index) || matchedCards.includes(index);
 
@@ -94,8 +99,8 @@ const App: React.FC = () => {
               key={index}
               className="relative cursor-pointer"
               style={{
-                width: `calc((70vh - ${(gridSize - 1) * 0.8}rem) / ${gridSize})`,
-                height: `calc((70vh - ${(gridSize - 1) * 0.8}rem) / ${gridSize})`,
+                width: `calc((min(60vh, 90vw) - ${(gridSize - 1) * 0.8}rem) / ${gridSize})`,
+                height: `calc((min(60vh, 90vw) - ${(gridSize - 1) * 0.8}rem) / ${gridSize})`,
               }}
               onClick={() => handleCardClick(card, index)}
             >
